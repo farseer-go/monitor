@@ -1,0 +1,15 @@
+package monitor
+
+import (
+	"github.com/farseer-go/fs/modules"
+)
+
+type Module struct {
+}
+
+func (module Module) DependsModule() []modules.FarseerModule {
+	return nil
+}
+
+func (module Module) PreInitialize() {
+}
