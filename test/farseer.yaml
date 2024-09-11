@@ -1,0 +1,7 @@
+Fops:
+  Server: "http://localhost:8889"
+Log:
+  LogLevel: "info"
+  Component:
+    fSchedule: true
+    webapi: false
