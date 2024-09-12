@@ -1,11 +1,10 @@
 module github.com/farseer-go/monitor
 
-go 1.21
-
-toolchain go1.22.0
+go 1.19
 
 require (
 	github.com/farseer-go/fs v0.14.0
+    github.com/farseer-go/utils v0.14.0
 	github.com/stretchr/testify v1.8.4
 )
 
