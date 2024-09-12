@@ -7,7 +7,7 @@ import (
 )
 
 // 发送消息
-func Send(appName, content string) {
+func Send(appName, content interface{}) {
 	address := defaultServer.getAddress()
 	wsClient, err := ws.Connect(address, 8192)
 	if err != nil {
