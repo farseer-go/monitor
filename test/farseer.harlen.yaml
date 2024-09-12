@@ -1,5 +1,5 @@
 Fops:
-  WsServer: "http://localhost:8889"
+  WsServer: "ws://localhost:8889"
 Log:
   LogLevel: "info"
   Component:
