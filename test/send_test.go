@@ -26,6 +26,7 @@ func TestSend(t *testing.T) {
 	dic := collections.NewDictionary[string, string]()
 	dic.Add("cpu", "35")
 	dic.Add("store", "120")
+	dic.Add("total", "0")
 	monitor.Send(monitor.SendContentVO{
 		AppId:   "app0001",
 		AppName: "监控程序",
