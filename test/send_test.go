@@ -1,12 +1,14 @@
 package test
 
 import (
+	"context"
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs"
 	"github.com/farseer-go/fs/modules"
 	"github.com/farseer-go/monitor"
 	"github.com/farseer-go/webapi"
 	"testing"
+	"time"
 )
 
 type startupModule struct {
@@ -17,19 +19,19 @@ func (module startupModule) DependsModule() []modules.FarseerModule {
 }
 
 func (module startupModule) PostInitialize() {
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	defer cancel()
+	monitor.AddMonitor(5*time.Second, func() collections.Dictionary[string, any] {
+		// 创建字典
+		dic := collections.NewDictionary[string, any]()
+		dic.Add("cpu", "35")
+		dic.Add("store", "120")
+		dic.Add("total", "0")
+		return dic
+	}, ctx)
 }
 
 // 发送测试信息
 func TestSend(t *testing.T) {
 	fs.Initialize[startupModule]("test monitor")
-	// 创建字典
-	dic := collections.NewDictionary[string, string]()
-	dic.Add("cpu", "35")
-	dic.Add("store", "120")
-	dic.Add("total", "0")
-	monitor.Send(monitor.SendContentVO{
-		AppId:   "app0001",
-		AppName: "监控程序",
-		Keys:    dic,
-	})
 }
