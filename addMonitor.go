@@ -1,7 +1,6 @@
 package monitor
 
 import (
-	"context"
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/core"
 	"github.com/farseer-go/fs/flog"
@@ -22,7 +21,7 @@ type monitorFunc func() collections.Dictionary[string, any]
 
 // AddMonitor 添加一个监控，运行前先休眠
 // interval:任务运行的间隔时间
-func AddMonitor(interval time.Duration, monitorFn monitorFunc, ctx context.Context) {
+func AddMonitor(interval time.Duration, monitorFn monitorFunc) {
 	// 不立即运行，则先休眠interval时间
 	if interval <= 0 {
 		panic("interval参数，必须大于0")
@@ -31,8 +30,8 @@ func AddMonitor(interval time.Duration, monitorFn monitorFunc, ctx context.Conte
 	go func() {
 		for {
 			select {
-			case <-ctx.Done():
-				return
+			//case <-ctx.Done():
+			//	return
 			case <-time.After(interval):
 				dic := monitorFn()
 				send(dic)
