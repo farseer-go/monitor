@@ -60,7 +60,7 @@ func wsConnectSendMsg(dic collections.Dictionary[string, any]) {
 		}
 	}
 	// 发送消息
-	catch := exception.Try(func() {
+	exception.Try(func() {
 		err = wsClient.(*ws.Client).Send(SendContentVO{
 			AppId:   parse.ToString(core.AppId),
 			AppName: core.AppName,
@@ -69,8 +69,7 @@ func wsConnectSendMsg(dic collections.Dictionary[string, any]) {
 		if err != nil {
 			flog.Warningf("[%s]监控发送消息失败：%s", core.AppName, err.Error())
 		}
-	})
-	catch.CatchException(func(exp any) {
+	}).CatchException(func(exp any) {
 		if exp != nil {
 			flog.Warningf("[%s]监控发送消息失败：%s", core.AppName, exp)
 			// 清楚已经保存的连接
