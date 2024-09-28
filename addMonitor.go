@@ -8,7 +8,6 @@ import (
 	"github.com/farseer-go/fs/flog"
 	"github.com/farseer-go/fs/parse"
 	"github.com/farseer-go/utils/ws"
-	"sync"
 	"time"
 )
 
@@ -20,7 +19,7 @@ type SendContentVO struct {
 }
 
 // 每个应用对应的ClientVO
-var mapClient = sync.Map{}
+var wsClient *ws.Client
 
 // monitorFunc 客户端要执行的monitor
 type monitorFunc func() collections.Dictionary[string, any]
@@ -48,20 +47,16 @@ func AddMonitor(interval time.Duration, monitorFn monitorFunc, ctx context.Conte
 // wsConnectSendMsg 发送消息
 func wsConnectSendMsg(dic collections.Dictionary[string, any]) {
 	var err error
-	wsClient, ok := mapClient.Load(core.AppName)
-	if !ok {
+	if wsClient == nil || wsClient.IsClose() {
 		address := defaultServer.getAddress()
 		wsClient, err = ws.Connect(address, 8192)
 		if err != nil {
 			flog.Warningf("[%s]wsmonitor连接fops失败：%s", core.AppName, err.Error())
-		} else {
-			// 保存连接
-			mapClient.Store(core.AppName, wsClient)
 		}
 	}
 	// 发送消息
 	exception.Try(func() {
-		err = wsClient.(*ws.Client).Send(SendContentVO{
+		err = wsClient.Send(SendContentVO{
 			AppId:   parse.ToString(core.AppId),
 			AppName: core.AppName,
 			Keys:    dic,
@@ -72,8 +67,6 @@ func wsConnectSendMsg(dic collections.Dictionary[string, any]) {
 	}).CatchException(func(exp any) {
 		if exp != nil {
 			flog.Warningf("[%s]监控发送消息失败：%s", core.AppName, exp)
-			// 清楚已经保存的连接
-			mapClient.Delete(core.AppName)
 		}
 	})
 }
