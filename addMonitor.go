@@ -56,7 +56,7 @@ func wsConnectSendMsg(dic collections.Dictionary[string, any]) {
 	}
 	// 发送消息
 	exception.Try(func() {
-		if wsClient != nil {
+		if wsClient != nil && !wsClient.IsClose() {
 			err = wsClient.Send(SendContentVO{
 				AppId:   parse.ToString(core.AppId),
 				AppName: core.AppName,
