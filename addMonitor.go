@@ -29,30 +29,32 @@ func AddMonitor(interval time.Duration, monitorFn monitorFunc) {
 	if interval <= 0 {
 		panic("interval参数，必须大于0")
 	}
-	for {
-		var err error
-		address := defaultServer.getAddress()
-		wsClient, err = ws.Connect(address, 8192)
-		if err != nil {
-			flog.Warningf("[%s]wsmonitor连接fops失败：%s", core.AppName, err.Error())
-			time.Sleep(3 * time.Second)
-			continue
-		}
+	go func() {
 		for {
-			dic := monitorFn()
-			// 发送消息
-			err = wsClient.Send(SendContentVO{
-				AppId:   parse.ToString(core.AppId),
-				AppName: core.AppName,
-				Keys:    dic,
-			})
+			var err error
+			address := defaultServer.getAddress()
+			wsClient, err = ws.Connect(address, 8192)
 			if err != nil {
-				flog.Warningf("[%s]监控发送消息失败：%s", core.AppName, err.Error())
-				break
+				flog.Warningf("[%s]wsmonitor连接fops失败：%s", core.AppName, err.Error())
+				time.Sleep(3 * time.Second)
+				continue
 			}
-			time.Sleep(interval)
+			for {
+				dic := monitorFn()
+				// 发送消息
+				err = wsClient.Send(SendContentVO{
+					AppId:   parse.ToString(core.AppId),
+					AppName: core.AppName,
+					Keys:    dic,
+				})
+				if err != nil {
+					flog.Warningf("[%s]监控发送消息失败：%s", core.AppName, err.Error())
+					break
+				}
+				time.Sleep(interval)
+			}
+			// 断开后重连
+			time.Sleep(3 * time.Second)
 		}
-		// 断开后重连
-		time.Sleep(3 * time.Second)
-	}
+	}()
 }
