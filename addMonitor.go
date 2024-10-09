@@ -56,17 +56,19 @@ func wsConnectSendMsg(dic collections.Dictionary[string, any]) {
 	}
 	// 发送消息
 	exception.Try(func() {
-		err = wsClient.Send(SendContentVO{
-			AppId:   parse.ToString(core.AppId),
-			AppName: core.AppName,
-			Keys:    dic,
-		})
-		if err != nil {
-			flog.Warningf("[%s]监控发送消息失败：%s", core.AppName, err.Error())
+		if wsClient != nil {
+			err = wsClient.Send(SendContentVO{
+				AppId:   parse.ToString(core.AppId),
+				AppName: core.AppName,
+				Keys:    dic,
+			})
+			if err != nil {
+				flog.Warningf("[%s]监控发送消息失败：%s", core.AppName, err.Error())
+			}
 		}
 	}).CatchException(func(exp any) {
 		if exp != nil {
-			flog.Warningf("[%s]监控发送消息失败：%s", core.AppName, exp)
+			flog.Warningf("[%s]监控发送消息异常：%s", core.AppName, exp)
 		}
 	})
 }
