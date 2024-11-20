@@ -1,12 +1,13 @@
 package monitor
 
 import (
+	"strconv"
+	"time"
+
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/core"
 	"github.com/farseer-go/fs/flog"
-	"github.com/farseer-go/fs/parse"
 	"github.com/farseer-go/utils/ws"
-	"time"
 )
 
 // SendContentVO monitor 发送实体
@@ -43,7 +44,7 @@ func AddMonitor(interval time.Duration, monitorFn monitorFunc) {
 				dic := monitorFn()
 				// 发送消息
 				err = wsClient.Send(SendContentVO{
-					AppId:   parse.ToString(core.AppId),
+					AppId:   strconv.FormatInt(core.AppId, 10),
 					AppName: core.AppName,
 					Keys:    dic,
 				})
