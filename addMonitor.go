@@ -59,16 +59,16 @@ func AddMonitor(interval time.Duration, monitorFn monitorFunc) {
 		}
 	}()
 }
-// AddDic 添加一个监控，直接发生消息
-func AddDic(dic collections.Dictionary[string, any]) {
-	go func() {
+// Send 添加一个监控，直接发送消息
+func Send(dic collections.Dictionary[string, any]) {
+	for {
 		var err error
 		address := defaultServer.getAddress()
 		wsClient, err = ws.Connect(address, 8192)
 		if err != nil {
 			flog.Warningf("[%s]wsmonitor连接fops失败：%s", core.AppName, err.Error())
 			time.Sleep(3 * time.Second)
-			return
+			continue
 		}
 		// 发送消息
 		err = wsClient.Send(SendContentVO{
@@ -78,7 +78,9 @@ func AddDic(dic collections.Dictionary[string, any]) {
 		})
 		if err != nil {
 			flog.Warningf("[%s]监控发送消息失败：%s", core.AppName, err.Error())
-			return
+			time.Sleep(3 * time.Second)
+			continue
 		}
-	}()
+		return
+	}
 }
