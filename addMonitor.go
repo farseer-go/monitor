@@ -41,16 +41,17 @@ func AddMonitor(interval time.Duration, monitorFn monitorFunc) {
 				continue
 			}
 			for {
-				dic := monitorFn()
-				// 发送消息
-				err = wsClient.Send(SendContentVO{
-					AppId:   strconv.FormatInt(core.AppId, 10),
-					AppName: core.AppName,
-					Keys:    dic,
-				})
-				if err != nil {
-					flog.Warningf("[%s]监控发送消息失败：%s", core.AppName, err.Error())
-					break
+				if dic := monitorFn(); dic.Count() > 0 {
+					// 发送消息
+					err = wsClient.Send(SendContentVO{
+						AppId:   strconv.FormatInt(core.AppId, 10),
+						AppName: core.AppName,
+						Keys:    dic,
+					})
+					if err != nil {
+						flog.Warningf("[%s]监控发送消息失败：%s", core.AppName, err.Error())
+						break
+					}
 				}
 				time.Sleep(interval)
 			}
@@ -59,6 +60,7 @@ func AddMonitor(interval time.Duration, monitorFn monitorFunc) {
 		}
 	}()
 }
+
 // Send 添加一个监控，直接发送消息
 func Send(dic collections.Dictionary[string, any]) {
 	for {
