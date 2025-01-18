@@ -63,6 +63,9 @@ func AddMonitor(interval time.Duration, monitorFn monitorFunc) {
 
 // Send 添加一个监控，直接发送消息
 func Send(dic collections.Dictionary[string, any]) {
+	if dic.Count() < 1 {
+		return
+	}
 	for {
 		var err error
 		address := defaultServer.getAddress()
