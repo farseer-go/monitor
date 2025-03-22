@@ -35,6 +35,7 @@ func AddMonitor(interval time.Duration, monitorFn monitorFunc) {
 			var err error
 			address := defaultServer.getAddress()
 			wsClient, err = ws.Connect(address, 8192)
+			wsClient.AutoExit = false
 			if err != nil {
 				flog.Warningf("[%s]wsmonitor连接fops失败：%s", core.AppName, err.Error())
 				time.Sleep(3 * time.Second)
@@ -70,6 +71,7 @@ func Send(dic collections.Dictionary[string, any]) {
 		var err error
 		address := defaultServer.getAddress()
 		wsClient, err = ws.Connect(address, 8192)
+		wsClient.AutoExit = false
 		if err != nil {
 			flog.Warningf("[%s]wsmonitor连接fops失败：%s", core.AppName, err.Error())
 			time.Sleep(3 * time.Second)

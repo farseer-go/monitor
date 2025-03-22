@@ -22,5 +22,4 @@ func (module Module) PreInitialize() {
 	if len(defaultServer.Address) < 1 {
 		panic("调度中心的地址[Fops.WsServer]未配置")
 	}
-
 }
