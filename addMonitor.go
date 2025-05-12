@@ -17,8 +17,8 @@ type SendContentVO struct {
 	Keys    collections.Dictionary[string, any] // 键值对
 }
 
-// 每个应用对应的ClientVO
-var wsClient *ws.Client
+// 所有连接共享一个wsClient
+var wsClientMonitor *ws.Client
 
 // monitorFunc 客户端要执行的monitor
 type monitorFunc func() collections.Dictionary[string, any]
@@ -32,24 +32,21 @@ func AddMonitor(interval time.Duration, monitorFn monitorFunc) {
 	}
 	go func() {
 		for {
-			var err error
-			address := defaultServer.getAddress()
-			wsClient, err = ws.Connect(address, 8192)
-			wsClient.AutoExit = false
-			if err != nil {
-				flog.Warningf("[%s]wsmonitor连接fops失败：%s", core.AppName, err.Error())
+			// 连接ws
+			if !connectWs() {
 				time.Sleep(3 * time.Second)
 				continue
 			}
 			for {
 				if dic := monitorFn(); dic.Count() > 0 {
 					// 发送消息
-					err = wsClient.Send(SendContentVO{
+					err := wsClientMonitor.Send(SendContentVO{
 						AppId:   strconv.FormatInt(core.AppId, 10),
 						AppName: core.AppName,
 						Keys:    dic,
 					})
 					if err != nil {
+						wsClientMonitor = nil
 						flog.Warningf("[%s]监控发送消息失败：%s", core.AppName, err.Error())
 						break
 					}
@@ -62,32 +59,17 @@ func AddMonitor(interval time.Duration, monitorFn monitorFunc) {
 	}()
 }
 
-// Send 添加一个监控，直接发送消息
-func Send(dic collections.Dictionary[string, any]) {
-	if dic.Count() < 1 {
-		return
-	}
-	for {
-		var err error
+// connectWs 连接ws
+func connectWs() bool {
+	var err error
+	if wsClientMonitor == nil || wsClientMonitor.IsClose() {
 		address := defaultServer.getAddress()
-		wsClient, err = ws.Connect(address, 8192)
-		wsClient.AutoExit = false
+		wsClientMonitor, err = ws.Connect(address, 8192)
+		wsClientMonitor.AutoExit = false
 		if err != nil {
+			wsClientMonitor = nil
 			flog.Warningf("[%s]wsmonitor连接fops失败：%s", core.AppName, err.Error())
-			time.Sleep(3 * time.Second)
-			continue
 		}
-		// 发送消息
-		err = wsClient.Send(SendContentVO{
-			AppId:   strconv.FormatInt(core.AppId, 10),
-			AppName: core.AppName,
-			Keys:    dic,
-		})
-		if err != nil {
-			flog.Warningf("[%s]监控发送消息失败：%s", core.AppName, err.Error())
-			time.Sleep(3 * time.Second)
-			continue
-		}
-		return
 	}
+	return wsClientMonitor != nil && !wsClientMonitor.IsClose()
 }
