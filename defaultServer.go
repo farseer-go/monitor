@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"fmt"
+
 	"github.com/farseer-go/fs/flog"
 )
 
@@ -16,7 +17,7 @@ type serverVO struct {
 func (receiver *serverVO) getAddress() string {
 	count := len(receiver.Address)
 	if count == 0 {
-		flog.Panic("./farseer.yml配置文件没有找到Fops.Server.Address的设置")
+		flog.Panic("./farseer.yml配置文件没有找到Fops.WsServer的设置")
 	}
 	return fmt.Sprintf("%s/ws/monitor", receiver.Address)
 }
