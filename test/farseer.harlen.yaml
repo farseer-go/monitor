@@ -1,7 +1,0 @@
-Fops:
-  WsServer: "ws://localhost:8889"
-Log:
-  LogLevel: "info"
-  Component:
-    fSchedule: true
-    webapi: false
